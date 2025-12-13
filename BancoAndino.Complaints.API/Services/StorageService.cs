@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Logging;
 using BancoAndino.Complaints.Shared.Interfaces;
 
 namespace BancoAndino.Complaints.API.Services;
@@ -7,10 +8,12 @@ namespace BancoAndino.Complaints.API.Services;
 public class StorageService : IStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
+    private readonly ILogger<StorageService>? _logger;
 
-    public StorageService(string connectionString)
+    public StorageService(string connectionString, ILogger<StorageService>? logger = null)
     {
         _blobServiceClient = new BlobServiceClient(connectionString);
+        _logger = logger;
     }
 
     public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string container = "evidences")
@@ -42,8 +45,9 @@ public class StorageService : IStorageService
             await blobClient.DeleteIfExistsAsync();
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger?.LogError(ex, "Error deleting blob: {BlobUrl}", blobUrl);
             return false;
         }
     }
@@ -62,8 +66,9 @@ public class StorageService : IStorageService
             var blobClient = new BlobClient(new Uri(blobUrl));
             return await blobClient.ExistsAsync();
         }
-        catch
+        catch (Exception ex)
         {
+            _logger?.LogError(ex, "Error checking blob existence: {BlobUrl}", blobUrl);
             return false;
         }
     }

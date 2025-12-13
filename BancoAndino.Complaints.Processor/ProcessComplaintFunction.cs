@@ -85,7 +85,7 @@ public class ProcessComplaintFunction
         // In production, this would be more sophisticated (load balancing, skills matching, etc.)
         var assignedTo = categoryId switch
         {
-            1 => "account-specialist@bancoandin.com",    // Account Issues
+            1 => "account-specialist@bancoandino.com",    // Account Issues
             2 => "card-specialist@bancoandino.com",      // Card Problems
             3 => "fraud-investigator@bancoandino.com",   // Transaction Dispute
             4 => "customer-service@bancoandino.com",     // Service Quality

@@ -6,13 +6,11 @@ namespace BancoAndino.Complaints.API.Services;
 
 public class CacheService : ICacheService
 {
-    private readonly IConnectionMultiplexer _redis;
     private readonly IDatabase _database;
 
-    public CacheService(string connectionString)
+    public CacheService(IConnectionMultiplexer redis)
     {
-        _redis = ConnectionMultiplexer.Connect(connectionString);
-        _database = _redis.GetDatabase();
+        _database = redis.GetDatabase();
     }
 
     public async Task<T?> GetAsync<T>(string key)

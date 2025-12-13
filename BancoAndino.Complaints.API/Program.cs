@@ -2,8 +2,10 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using StackExchange.Redis;
 using BancoAndino.Complaints.Shared.Data;
 using BancoAndino.Complaints.Shared.Interfaces;
 using BancoAndino.Complaints.API.Services;
@@ -40,10 +42,16 @@ builder.Services.AddScoped<IComplaintRepository>(sp =>
 });
 
 builder.Services.AddSingleton<IStorageService>(sp =>
-    new StorageService(blobStorageConnectionString));
+{
+    var logger = sp.GetRequiredService<ILogger<StorageService>>();
+    return new StorageService(blobStorageConnectionString, logger);
+});
 
-builder.Services.AddSingleton<ICacheService>(sp =>
-    new CacheService(redisConnectionString));
+// Register Redis ConnectionMultiplexer as singleton
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(redisConnectionString));
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>
